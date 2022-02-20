@@ -1,0 +1,3 @@
+[submodule "ocpp-base"]
+	path = ocpp-base
+	url = https://github.com/mobilityhouse/ocpp.git
