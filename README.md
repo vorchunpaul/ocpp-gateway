@@ -25,12 +25,12 @@ all :-)
 ### DefList 
 
 `CP` - charging point  
-`SE` - OCPP server
+`CS` - OCPP server
 
 ### Sheme
 
 ```
-CP(v201) -> (SE(v201) <-> CP(v106)) -> SE(v106)
+CP(v201) -> (CS(v201) <-> CP(v106)) -> CS(v106)
 ```
 
 ## LICENSE
