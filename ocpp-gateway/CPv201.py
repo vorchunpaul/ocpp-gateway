@@ -33,11 +33,11 @@ class ChargePoint(cp):
 
 async def main():
     async with websockets.connect(
-            'ws://127.0.0.1:9000/v201/CP_1',
+            'ws://127.0.0.1:8000/CP_201',
             subprotocols=['ocpp2.0.1']
     ) as ws:
 
-        charge_point = ChargePoint('CP_1', ws)
+        charge_point = ChargePoint('CP_201', ws)
         await asyncio.gather(charge_point.start(),
                              charge_point.send_boot_notification())
 

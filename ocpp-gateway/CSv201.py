@@ -13,27 +13,26 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 from ocpp.routing import on
-from ocpp.v16 import ChargePoint as cp
-from ocpp.v16.enums import Action, RegistrationStatus
-from ocpp.v16 import call_result
+from ocpp.v201 import ChargePoint as cp
+from ocpp.v201 import call_result
 
 logging.basicConfig(level=logging.INFO)
 
 
 class ChargePoint(cp):
-    @on(Action.Heartbeat)
+    @on('BootNotification')
+    def on_boot_notification(self, charging_station, reason, **kwargs):
+        return call_result.BootNotificationPayload(
+            current_time=datetime.utcnow().isoformat(),
+            interval=10,
+            status='Accepted'
+        )
+
+    @on('Heartbeat')
     def on_heartbeat(self):
         print('Got a Heartbeat!')
         return call_result.HeartbeatPayload(
             current_time=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S') + "Z"
-        )
-        
-    @on(Action.BootNotification)
-    def on_boot_notification(self, charge_point_vendor: str, charge_point_model: str, **kwargs):
-        return call_result.BootNotificationPayload(
-            current_time=datetime.utcnow().isoformat(),
-            interval=10,
-            status=RegistrationStatus.accepted
         )
 
 
@@ -45,6 +44,9 @@ async def on_connect(websocket, path):
         requested_protocols = websocket.request_headers[
             'Sec-WebSocket-Protocol']
     except KeyError:
+        logging.info("Client hasn't requested any Subprotocol. "
+                     "Closing Connection")
+        return await websocket.close()
         logging.error(
             "Client hasn't requested any Subprotocol. Closing Connection"
         )
@@ -56,23 +58,24 @@ async def on_connect(websocket, path):
         # client and the server, it proceeds without a subprotocol,
         # so we have to manually close the connection.
         logging.warning('Protocols Mismatched | Expected Subprotocols: %s,'
-                        ' but client supports  %s | Closing connection',
+                        ' but client supports %s | Closing connection',
                         websocket.available_subprotocols,
                         requested_protocols)
         return await websocket.close()
 
     charge_point_id = path.strip('/')
-    cp = ChargePoint(charge_point_id, websocket)
+    charge_point = ChargePoint(charge_point_id, websocket)
 
-    await cp.start()
+    await charge_point.start()
 
 
 async def main():
+    #  deepcode ignore BindToAllNetworkInterfaces: <Example Purposes>
     server = await websockets.serve(
         on_connect,
-        '127.0.0.2',
-        7000,
-        subprotocols=['ocpp1.6']
+        '127.0.0.1',
+        8000,
+        subprotocols=['ocpp2.0.1']
     )
 
     logging.info("Server Started listening to new connections...")

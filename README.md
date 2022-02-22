@@ -6,15 +6,32 @@ OCPP 2.0.1 to 1.6 gateway.
 
 Base on this [project](https://github.com/mobilityhouse/ocpp)
 
+## How to run (local)
+
+Start charge server v1.6 
+```
+python CS160.py
+```   
+Start gateway 
+```
+python gateway_runner.py
+```  
+Start charge point v2.0.1 
+```
+python CP201.py
+```  
+
+All done work in 3 tty
+
 ## Supported messages
 | status |    v160       | v201|
 |---|--------------------|-------------------------|
-| X | BootNotification   | BootNotification        | 
-| X | StartTransaction   | RequestStartTransaction |
-| X | StopTransaction    | RemoteStopTransaction   |
-| X | StatusNotification | StatusNotification      |
-| X | MeterValues        | MeterValues             |
-| X | Heartbeat          | Heartbeat               |
+| + | BootNotification   | BootNotification        | 
+| + | Heartbeat          | Heartbeat               |
+| - | StartTransaction   | RequestStartTransaction |
+| - | StopTransaction    | RemoteStopTransaction   |
+| - | StatusNotification | StatusNotification      |
+| - | MeterValues        | MeterValues             |
 
 ### Planned
 
