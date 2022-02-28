@@ -2,7 +2,6 @@ from argparse import Action
 import asyncio
 import logging
 from datetime import datetime
-from urllib import response
 import websockets
 
 from ocpp.routing import on as v201_on
@@ -31,9 +30,19 @@ class ChargePoint(v16_cp):
         response = await self.call(request)
 
         if response.status == v16_RegistrationStatus.accepted:
-            print("Connected to CSv160")
+            # print("Connected to CSv160")
             return response
             
+    async def send_notification(self, kwargs):
+        request = v16_call.StatusNotificationPayload(
+            connector_id=kwargs['connector_id'],
+            error_code="NoError",
+            status=kwargs['connector_status'],
+        )
+        
+        await self.call(request)
+        
+        
 class Gateway(v201_cp_server):
     
         
@@ -46,7 +55,7 @@ class Gateway(v201_cp_server):
         logging.debug(f"resv `BootNotification` from CPv201 {a}")
         
         return v201_call_result.BootNotificationPayload(
-            current_time=datetime.utcnow().isoformat(),
+            current_time=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S') + "Z",
             interval=a[0].interval,
             status=a[0].status
         )
@@ -61,6 +70,15 @@ class Gateway(v201_cp_server):
         return v201_call_result.HeartbeatPayload(
             current_time=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S') + "Z"
         )
+    
+    @v201_on('StatusNotification')
+    async def on_status_notificationt(self, **kwargs):
+        logging.info(f'NOTIFICATION {kwargs}')
+        
+        cp_task = asyncio.create_task(self.cp.send_notification(kwargs))
+        await asyncio.gather(cp_task)
+        
+        return v201_call_result.StatusNotificationPayload()
 
 async def gateway_connect(cs_ws, path: str):
     cp_id = path.strip("/")

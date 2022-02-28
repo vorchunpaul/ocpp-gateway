@@ -24,13 +24,14 @@ python CP201.py
 All done work in 3 tty
 
 ## Supported messages
+
 | status |    v160       | v201|
 |---|--------------------|-------------------------|
 | + | BootNotification   | BootNotification        | 
 | + | Heartbeat          | Heartbeat               |
 | - | StartTransaction   | RequestStartTransaction |
 | - | StopTransaction    | RemoteStopTransaction   |
-| - | StatusNotification | StatusNotification      |
+| + | StatusNotification | StatusNotification      |
 | - | MeterValues        | MeterValues             |
 
 ### Planned
