@@ -23,7 +23,7 @@ class ChargePoint(cp):
     @on('BootNotification')
     def on_boot_notification(self, charging_station, reason, **kwargs):
         return call_result.BootNotificationPayload(
-            current_time=datetime.utcnow().isoformat(),
+            current_time=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S') + "Z",
             interval=10,
             status='Accepted'
         )
@@ -34,7 +34,11 @@ class ChargePoint(cp):
         return call_result.HeartbeatPayload(
             current_time=datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S') + "Z"
         )
-
+        
+    @on('StatusNotification')
+    def on_status_notificationt(self, **kwargs):
+        logging.info(f'NOTIFICATION {kwargs}')
+        return call_result.StatusNotificationPayload()
 
 async def on_connect(websocket, path):
     """ For every new charge point that connects, create a ChargePoint
